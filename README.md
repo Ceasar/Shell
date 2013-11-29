@@ -1,7 +1,7 @@
 
-# my_shell
+# ceash - CEAsar SHell
 
-My personal custom shell.
+ceash is an sh-compatible command language interpreter that executes commands read from the standard input.
 
 # Setup
 
