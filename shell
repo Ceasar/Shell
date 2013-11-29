@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+import os
+from subprocess import call, check_output
+
+from twosheds import Shell
+from twosheds.completer import Completer
+from twosheds.history import History
+
+ALIASES = {
+    'args': 'xargs -0',
+     # 'env': 'env | xargs -0 | sort',
+    'c': 'cd',
+    'l': 'ls -G',
+    'la': 'ls -aG',
+    'ls': 'ls -G',
+    '..': 'cd ..',
+    'os': 'uname -srm',
+    'pingme': 'ping google.com',
+}
+
+PATH = ["/Users/ceasarbautista/local/bin",
+        "/Users/ceasarbautista/local/bin/icon/bin",
+        "/Users/ceasarbautista/bin",
+        "/usr/local/bin",
+        "/usr/bin",
+        "/usr/sbin",
+        "/usr/X11R6/bin",
+        "/bin",
+        "/sbin",
+        "/Users/ceasarbautista/Library/Haskell/ghc-7.4.1/lib/ghc-mod-1.11.0/bin",
+        ]
+
+os.environ['PATH'] = ":".join(PATH)
+
+
+class MyShell(Shell):
+    last = ""
+
+    @property
+    def prompt(self):
+        pwd = check_output("pwd", shell=True)
+        return (pwd.strip() + " ").replace(os.environ["HOME"], "~")
+
+    def eval(self, line):
+        super(MyShell, self).eval(line)
+        ls = check_output("ls", shell=True)
+        if ls != self.last:
+            self.last = ls
+            if "ls" not in line:
+                call("ls -G", shell=True)
+
+shell = History(Completer(MyShell(aliases=ALIASES)))
+shell.interact("Hello Ceasar!")
