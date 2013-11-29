@@ -7,16 +7,60 @@ from twosheds.completer import Completer
 from twosheds.history import History
 
 ALIASES = {
-    'args': 'xargs -0',
-     # 'env': 'env | xargs -0 | sort',
-    'c': 'cd',
-    'l': 'ls -G',
-    'la': 'ls -aG',
+    'cp': 'cp -i',
+    # sort variables
+    'env': 'env | xargs -0 | sort',
+    # color output
     'ls': 'ls -G',
-    '..': 'cd ..',
+    # color output
+    'grep': 'grep --color=auto',
+}
+
+HUMAN_ALIASES = {
+    'copy': 'cp',
+    'del': 'rm',
+    'delete': 'rm',
+    'goto': 'cd',
+    'list': 'ls',
+    'move': 'mv',
+    'now': 'date',
+    'whereami': 'pwd',
+    'unixtime': 'date +$%s',
+}
+
+UTILITY_ALIASES = {
+    # more intuitive xargs
+    'args': 'xargs -0',
+    # grep recursively. show line numbers and one line of context on either side
+    'f': 'grep -rn -C 1',
+    # find name
+    'fn': 'find . -name',
+    # list filenames by relative path
+    'lr': 'find . -type f | sed "s#^./##',
+    # tell me what OS this is
     'os': 'uname -srm',
+    # check connection speed
     'pingme': 'ping google.com',
 }
+
+SHORT_ALIASES = {
+    '..': 'cd ..',
+    '...': 'cd ...',
+    'c': 'cd',
+    'e': '$EDITOR',
+    'l': 'ls -G',
+    # show hidden files
+    'la': 'ls -aG',
+    # show file metadata and symlinks pointers
+    'll': 'ls -lG',
+    'v': '$EDITOR',
+}
+
+def get_aliases():
+    return dict(ALIASES.items()
+                + HUMAN_ALIASES.items()
+                + UTILITY_ALIASES.items()
+                + SHORT_ALIASES.items())
 
 PATH = ["/Users/ceasarbautista/local/bin",
         "/Users/ceasarbautista/local/bin/icon/bin",
@@ -49,5 +93,5 @@ class MyShell(Shell):
             if "ls" not in line:
                 call("ls -G", shell=True)
 
-shell = History(Completer(MyShell(aliases=ALIASES)))
+shell = History(Completer(MyShell(aliases=get_aliases())))
 shell.interact("Hello Ceasar!")
