@@ -8,6 +8,7 @@ ceash is an sh-compatible command language interpreter that executes commands re
 In the home directory:
 
 ```
+pip install twosheds
 git clone git@github.com:Ceasar/my_shell.git
 ln -s my_shell/shell shell
 ```
