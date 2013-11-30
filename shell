@@ -93,5 +93,5 @@ class MyShell(Shell):
             if "ls" not in line:
                 call("ls -G", shell=True)
 
-shell = History(Completer(MyShell(aliases=get_aliases())))
+shell = History(Completer(MyShell(aliases=get_aliases()), exclude=[r'.*.pyc']))
 shell.interact("Hello Ceasar!")
