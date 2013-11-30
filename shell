@@ -85,13 +85,12 @@ class MyShell(Shell):
         pwd = check_output("pwd", shell=True)
         return (pwd.strip() + " ").replace(os.environ["HOME"], "~")
 
-    def eval(self, line):
-        super(MyShell, self).eval(line)
+    def read(self):
         ls = check_output("ls", shell=True)
         if ls != self.last:
             self.last = ls
-            if "ls" not in line:
-                call("ls -G", shell=True)
+            call("ls -G", shell=True)
+        return super(MyShell, self).read()
 
 shell = History(Completer(MyShell(aliases=get_aliases()), exclude=[r'.*.pyc']))
 shell.interact("Hello Ceasar!")
