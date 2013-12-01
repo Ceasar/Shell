@@ -1,14 +1,20 @@
 #!/usr/bin/env python
 import os
-from subprocess import call, check_output, CalledProcessError
+import subprocess
 
 import twosheds
+
+
+def sh(command):
+    """Run a command in the shell and capture the output."""
+    return subprocess.check_output(command, shell=True)
 
 
 HUMAN_ALIASES = {
     'copy': 'cp',
     # ask before overriding files
     'cp': 'cp -i',
+    'edit': '$EDITOR',
     # sort variables
     'env': 'env | xargs -0 | sort',
     'del': 'rm',
@@ -83,30 +89,36 @@ os.environ['VISUAL'] = os.environ['EDITOR']
 
 
 class MyShell(twosheds.Shell):
-    last = ""
+    last_ls = ""
     last_gs = ""
 
     @property
     def git_branch(self):
+        """The current git branch."""
         try:
-            return check_output("git symbolic-ref --short HEAD 2> /dev/null",
-                                shell=True).strip()
-        except CalledProcessError:
+            return sh("git symbolic-ref --short HEAD 2> /dev/null").strip()
+        except subprocess.CalledProcessError:
             return None
 
     @property
+    def working_directory(self):
+        """The current working directory."""
+        return os.getcwd().replace(os.environ["HOME"], "~")
+
+    @property
     def prompt(self):
-        pwd = os.getcwd().replace(os.environ["HOME"], "~")
+        working_directory = self.working_directory
         branch = self.git_branch
         if branch is not None:
-            return "%s(%s) " % (pwd, branch)
+            return "%s(%s) " % (working_directory, branch)
         else:
-            return pwd + " "
+            return working_directory + " "
 
     def auto_gs(self):
+        """Automatically run ``git status`` if the output changes."""
         try:
-            gs = check_output("git status 2> /dev/null", shell=True)
-        except CalledProcessError:
+            gs = sh("git status 2> /dev/null")
+        except subprocess.CalledProcessError:
             pass
         else:
             if gs != self.last_gs:
@@ -114,9 +126,11 @@ class MyShell(twosheds.Shell):
                 self.eval("git status -s")
 
     def auto_ls(self):
-        ls = check_output("ls", shell=True)
-        if ls != self.last:
-            self.last = ls
+        """Automatically run ``ls`` if the output changes."""
+        ls = sh("ls")
+        if ls != self.last_ls:
+            self.last_ls = ls
+            # NOTE: Not sure this really belongs here
             self.eval("clear")
             self.eval("ls")
 
