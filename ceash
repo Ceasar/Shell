@@ -84,6 +84,7 @@ os.environ['VISUAL'] = os.environ['EDITOR']
 
 class MyShell(twosheds.Shell):
     last = ""
+    last_gs = ""
 
     @property
     def git_branch(self):
@@ -102,11 +103,25 @@ class MyShell(twosheds.Shell):
         else:
             return pwd + " "
 
-    def read(self):
+    def auto_gs(self):
+        try:
+            gs = check_output("git status 2> /dev/null", shell=True)
+        except CalledProcessError:
+            pass
+        else:
+            if gs != self.last_gs:
+                self.last_gs = gs
+                self.eval("git status")
+
+    def auto_ls(self):
         ls = check_output("ls", shell=True)
         if ls != self.last:
             self.last = ls
             self.eval("ls")
+
+    def read(self):
+        self.auto_gs()
+        self.auto_ls()
         return super(MyShell, self).read()
 
 shell = MyShell(aliases=get_aliases(), echo=True, exclude=[r'.*.pyc'])
