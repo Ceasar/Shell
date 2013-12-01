@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from subprocess import check_output, CalledProcessError
+from subprocess import call, check_output, CalledProcessError
 
 import twosheds
 
@@ -111,17 +111,18 @@ class MyShell(twosheds.Shell):
         else:
             if gs != self.last_gs:
                 self.last_gs = gs
-                self.eval("git status")
+                self.eval("git status -s")
 
     def auto_ls(self):
         ls = check_output("ls", shell=True)
         if ls != self.last:
             self.last = ls
+            self.eval("clear")
             self.eval("ls")
 
     def read(self):
-        self.auto_gs()
         self.auto_ls()
+        self.auto_gs()
         return super(MyShell, self).read()
 
 shell = MyShell(aliases=get_aliases(), echo=True, exclude=[r'.*.pyc'])
