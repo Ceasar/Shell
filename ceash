@@ -71,7 +71,6 @@ os.environ['HOST'] = "$(uname -n)"
 os.environ.setdefault('UNAME', "$(uname)")
 
 PATH = ["$HOME/local/bin",
-        "$HOME/local/bin/icon/bin",
         "$HOME/bin",
         "/usr/local/bin",
         "/usr/bin",
