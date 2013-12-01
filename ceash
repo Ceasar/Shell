@@ -80,8 +80,7 @@ class MyShell(twosheds.Shell):
 
     @property
     def prompt(self):
-        pwd = check_output("pwd", shell=True)
-        return (pwd.strip() + " ").replace(os.environ["HOME"], "~")
+        return os.getcwd().replace(os.environ["HOME"], "~") + " "
 
     def read(self):
         ls = check_output("ls", shell=True)
