@@ -5,9 +5,6 @@ from subprocess import check_output
 import twosheds
 
 
-HOME = os.environ['HOME']
-
-
 HUMAN_ALIASES = {
     'copy': 'cp',
     # ask before overriding files
