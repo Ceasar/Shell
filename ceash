@@ -5,6 +5,9 @@ from subprocess import check_output
 import twosheds
 
 
+HOME = os.environ['HOME']
+
+
 HUMAN_ALIASES = {
     'copy': 'cp',
     # ask before overriding files
@@ -67,19 +70,18 @@ os.environ['EDITOR'] = "vim"
 os.environ['HOST'] = "$(uname -n)"
 os.environ.setdefault('UNAME', "$(uname)")
 
-PATH = ["/Users/ceasarbautista/local/bin",
-        "/Users/ceasarbautista/local/bin/icon/bin",
-        "/Users/ceasarbautista/bin",
+PATH = ["$HOME/local/bin",
+        "$HOME/local/bin/icon/bin",
+        "$HOME/bin",
         "/usr/local/bin",
         "/usr/bin",
         "/usr/sbin",
         "/usr/X11R6/bin",
         "/bin",
         "/sbin",
-        # Enable syntastic to work with Haskell in Vim
-        "/Users/ceasarbautista/Library/Haskell/ghc-7.4.1/lib/ghc-mod-1.11.0/bin",
         ]
 os.environ['PATH'] = ":".join(PATH)
+# NOTE: for some reason $HOME does not get expanded
 os.environ['PYTHONSTARTUP'] = os.environ['HOME'] + "/.pythonrc.py"
 os.environ['VISUAL'] = os.environ['EDITOR']
 
@@ -99,4 +101,4 @@ class MyShell(twosheds.Shell):
         return super(MyShell, self).read()
 
 shell = MyShell(aliases=get_aliases(), echo=True, exclude=[r'.*.pyc'])
-shell.interact("Hello Ceasar!")
+shell.interact("Hello!")
