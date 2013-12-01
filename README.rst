@@ -24,6 +24,6 @@ Optionally, to set as the default shell:
 .. code-block:: bash
 
     # make ceash a standard shell. requires root privileges.
-    $ make standard
+    $ sudo make standard
     # change the default shell to ceash
     $ make default
