@@ -4,6 +4,7 @@ from subprocess import check_output
 
 import twosheds
 
+
 HUMAN_ALIASES = {
     'copy': 'cp',
     # ask before overriding files
@@ -31,10 +32,15 @@ UTILITY_ALIASES = {
     'f': 'grep -rn -C 1',
     # find name
     'fn': 'find . -name',
+     # Remove all local merged branches
+    'gitclean': 'git branch --merged | grep -v ^\* | sed "s/^ *//" | xargs -n 1 git accept',
+     # Remove all remote merged branches
+    'gitcleanremote': 'git branch --merged | grep -v ^\* | sed "s/^ *//" | xargs -n 1 git accept',
     # list filenames by relative path
     'lr': 'find . -type f | sed "s#^./##',
     # check connection speed
     'pingme': 'ping google.com',
+    'vimrc': '$EDITOR ~/.vimrc',
 }
 
 SHORT_ALIASES = {
@@ -42,6 +48,8 @@ SHORT_ALIASES = {
     '...': 'cd ...',
     'c': 'cd',
     'e': '$EDITOR',
+    'g': 'git',
+    'gs': "git status",
     'l': 'ls -G',
     # show hidden files
     'la': 'ls -aG',
@@ -68,9 +76,11 @@ PATH = ["/Users/ceasarbautista/local/bin",
         "/usr/X11R6/bin",
         "/bin",
         "/sbin",
+        # Enable syntastic to work with Haskell in Vim
         "/Users/ceasarbautista/Library/Haskell/ghc-7.4.1/lib/ghc-mod-1.11.0/bin",
         ]
 os.environ['PATH'] = ":".join(PATH)
+os.environ['PYTHONSTARTUP'] = os.environ['HOME'] + "/.pythonrc.py"
 os.environ['VISUAL'] = os.environ['EDITOR']
 
 
