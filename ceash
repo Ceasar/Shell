@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 
 import twosheds
 
@@ -86,8 +86,21 @@ class MyShell(twosheds.Shell):
     last = ""
 
     @property
+    def git_branch(self):
+        try:
+            return check_output("git symbolic-ref --short HEAD 2> /dev/null",
+                                shell=True).strip()
+        except CalledProcessError:
+            return None
+
+    @property
     def prompt(self):
-        return os.getcwd().replace(os.environ["HOME"], "~") + " "
+        pwd = os.getcwd().replace(os.environ["HOME"], "~")
+        branch = self.git_branch
+        if branch is not None:
+            return "%s(%s) " % (pwd, branch)
+        else:
+            return pwd + " "
 
     def read(self):
         ls = check_output("ls", shell=True)
