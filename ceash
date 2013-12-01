@@ -4,22 +4,20 @@ from subprocess import check_output
 
 import twosheds
 
-ALIASES = {
+HUMAN_ALIASES = {
+    'copy': 'cp',
+    # ask before overriding files
     'cp': 'cp -i',
     # sort variables
     'env': 'env | xargs -0 | sort',
-    # color output
-    'ls': 'ls -G',
-    # color output
-    'grep': 'grep --color=auto',
-}
-
-HUMAN_ALIASES = {
-    'copy': 'cp',
     'del': 'rm',
     'delete': 'rm',
     'goto': 'cd',
+    # color output
+    'grep': 'grep --color=auto',
     'list': 'ls',
+    # color output
+    'ls': 'ls -G',
     'move': 'mv',
     'now': 'date',
     'whereami': 'pwd',
@@ -35,8 +33,6 @@ UTILITY_ALIASES = {
     'fn': 'find . -name',
     # list filenames by relative path
     'lr': 'find . -type f | sed "s#^./##',
-    # tell me what OS this is
-    'os': 'uname -srm',
     # check connection speed
     'pingme': 'ping google.com',
 }
@@ -55,10 +51,13 @@ SHORT_ALIASES = {
 }
 
 def get_aliases():
-    return dict(ALIASES.items()
-                + HUMAN_ALIASES.items()
+    return dict(HUMAN_ALIASES.items()
                 + UTILITY_ALIASES.items()
                 + SHORT_ALIASES.items())
+
+os.environ['EDITOR'] = "vim"
+os.environ['HOST'] = "$(uname -n)"
+os.environ.setdefault('UNAME', "$(uname)")
 
 PATH = ["/Users/ceasarbautista/local/bin",
         "/Users/ceasarbautista/local/bin/icon/bin",
@@ -71,8 +70,8 @@ PATH = ["/Users/ceasarbautista/local/bin",
         "/sbin",
         "/Users/ceasarbautista/Library/Haskell/ghc-7.4.1/lib/ghc-mod-1.11.0/bin",
         ]
-
 os.environ['PATH'] = ":".join(PATH)
+os.environ['VISUAL'] = os.environ['EDITOR']
 
 
 class MyShell(twosheds.Shell):
