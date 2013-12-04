@@ -104,9 +104,11 @@ class MyShell(twosheds.Shell):
     def working_directory(self):
         """The current working directory."""
         try:
-            return os.getcwd().replace(os.environ["HOME"], "~")
+            pwd = os.getcwdu()
         except OSError:
             return "?"
+        else:
+            return self.language.grammar.transform(pwd, inverse=True)
 
     @property
     def prompt(self):
