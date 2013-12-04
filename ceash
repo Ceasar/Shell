@@ -14,19 +14,11 @@ def sh(command):
 
 HUMAN_ALIASES = {
     'copy': 'cp',
-    # ask before overriding files
-    'cp': 'cp -i',
     'edit': '$EDITOR',
-    # sort variables
-    'env': 'env | xargs -0 | sort',
     'del': 'rm',
     'delete': 'rm',
     'goto': 'cd',
-    # color output
-    'grep': 'grep --color=auto',
     'list': 'ls',
-    # color output
-    'ls': 'ls -G',
     'move': 'mv',
     'now': 'date',
     'whereami': 'pwd',
@@ -58,12 +50,23 @@ SHORT_ALIASES = {
     'e': '$EDITOR',
     'g': 'git',
     'gs': "git status -s",
-    'l': 'ls -G',
+    'l': 'ls',
     # show hidden files
-    'la': 'ls -aG',
+    'la': 'ls -a',
     # show file metadata and symlinks pointers
-    'll': 'ls -lG',
+    'll': 'ls -l',
     'v': '$EDITOR',
+}
+
+MASK_ALIASES = {
+    # ask before overriding files
+    'cp': 'cp -i',
+    # sort variables
+    'env': 'env | xargs -0 | sort',
+    # color output
+    'grep': 'grep --color=auto',
+    # color output
+    'ls': 'ls -G',
 }
 
 def get_aliases():
@@ -92,6 +95,13 @@ os.environ['VISUAL'] = os.environ['EDITOR']
 class MyShell(twosheds.Shell):
     last_ls = ""
     last_gs = ""
+
+    def __init__(self, *args, **kwargs):
+        super(MyShell, self).__init__(*args, **kwargs)
+        self.language.grammar.transforms.insert(
+            1,
+            twosheds.transform.AliasTransform(MASK_ALIASES)
+        )
 
     @property
     def git_branch(self):
