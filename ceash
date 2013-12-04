@@ -55,7 +55,7 @@ SHORT_ALIASES = {
     'c': 'cd',
     'e': '$EDITOR',
     'g': 'git',
-    'gs': "git status",
+    'gs': "git status -s",
     'l': 'ls -G',
     # show hidden files
     'la': 'ls -aG',
