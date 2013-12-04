@@ -4,6 +4,8 @@ import subprocess
 
 import twosheds
 
+HOME = os.environ['HOME']
+
 
 def sh(command):
     """Run a command in the shell and capture the output."""
@@ -73,8 +75,8 @@ os.environ['EDITOR'] = "vim"
 os.environ['HOST'] = "$(uname -n)"
 os.environ.setdefault('UNAME', "$(uname)")
 
-PATH = ["$HOME/local/bin",
-        "$HOME/bin",
+PATH = ["%s/local/bin" % HOME,
+        "%s/bin" % HOME,
         "/usr/local/bin",
         "/usr/bin",
         "/usr/sbin",
@@ -83,8 +85,7 @@ PATH = ["$HOME/local/bin",
         "/sbin",
         ]
 os.environ['PATH'] = ":".join(PATH)
-# NOTE: for some reason $HOME does not get expanded
-os.environ['PYTHONSTARTUP'] = os.environ['HOME'] + "/.pythonrc.py"
+os.environ['PYTHONSTARTUP'] = "%s/.pythonrc.py" % HOME
 os.environ['VISUAL'] = os.environ['EDITOR']
 
 
