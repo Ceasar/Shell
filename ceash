@@ -135,8 +135,6 @@ class MyShell(twosheds.Shell):
         ls = sh("ls")
         if ls != self.last_ls:
             self.last_ls = ls
-            # NOTE: Not sure this really belongs here
-            self.eval("clear")
             self.eval("ls")
 
     def read(self):
