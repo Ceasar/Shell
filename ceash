@@ -122,8 +122,18 @@ class MyShell(twosheds.Shell):
             return self.language.grammar.transform(pwd, inverse=True)
 
     @property
+    def working_directory_short(self):
+        pwd = self.working_directory
+        parts = pwd.split("/")
+        if len(parts) == 1:
+            return parts[0]
+        else:
+            return "%s/%s" % ("/".join(part[0]for part in parts[:-1]),
+                              parts[-1])
+
+    @property
     def prompt(self):
-        working_directory = self.working_directory
+        working_directory = self.working_directory_short
         branch = self.git_branch
         if branch is not None:
             return "%s(%s) " % (working_directory, branch)
