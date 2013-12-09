@@ -12,6 +12,7 @@ def sh(command):
     return subprocess.check_output(command, shell=True)
 
 
+
 HUMAN_ALIASES = {
     'copy': 'cp',
     'edit': '$EDITOR',
@@ -163,5 +164,11 @@ class MyShell(twosheds.Shell):
         self.auto_gs()
         return super(MyShell, self).read()
 
+
 shell = MyShell(aliases=get_aliases(), echo=True, exclude=[r'.*.pyc'])
+
+def find_in(directory, q):
+    return shell.eval('mdfind %s -onlyin %s' % (q, directory))
+shell.language.semantics.builtins['findin'] = find_in
+
 shell.interact("Hello!")
