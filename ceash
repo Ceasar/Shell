@@ -141,16 +141,19 @@ class MyShell(twosheds.Shell):
         else:
             return working_directory + " "
 
+    @property
+    def git_status(self):
+        try:
+            return sh("git status --porcelain 2> /dev/null")
+        except subprocess.CalledProcessError:
+            return None
+
     def auto_gs(self):
         """Automatically run ``git status`` if the output changes."""
-        try:
-            gs = sh("git status 2> /dev/null")
-        except subprocess.CalledProcessError:
-            pass
-        else:
-            if gs != self.last_gs:
-                self.last_gs = gs
-                self.eval("git status -s")
+        gs = self.git_status
+        if gs is not None and gs != self.last_gs:
+            self.last_gs = gs
+            self.eval("git status -s")
 
     def auto_ls(self):
         """Automatically run ``ls`` if the output changes."""
