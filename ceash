@@ -1,16 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python -i
 import os
-import subprocess
+import sys
+
+# Path to Homebrew's site-packages
+sys.path.append("/usr/local/lib/python2.7/site-packages/")
 
 import twosheds
 
-HOME = os.environ['HOME']
-
-
-def sh(command):
-    """Run a command in the shell and capture the output."""
-    return subprocess.check_output(command, shell=True)
-
+import git
+from helpers import working_directory
+from sh import sh
 
 
 HUMAN_ALIASES = {
@@ -75,10 +74,9 @@ def get_aliases():
                 + UTILITY_ALIASES.items()
                 + SHORT_ALIASES.items())
 
-os.environ['EDITOR'] = "vim"
-os.environ['HOST'] = "$(uname -n)"
-os.environ.setdefault('UNAME', "$(uname)")
 
+
+HOME = os.environ['HOME']
 PATH = ["%s/local/bin" % HOME,
         "%s/bin" % HOME,
         "/usr/local/bin",
@@ -87,91 +85,97 @@ PATH = ["%s/local/bin" % HOME,
         "/usr/X11R6/bin",
         "/bin",
         "/sbin",
+        "/usr/local/share/npm/bin",
         ]
 os.environ['PATH'] = ":".join(PATH)
+
+PYTHONPATH = [
+    "/Users/ceasarbautista/lib/python/",
+    "/usr/local/lib/python2.7/site-packages"
+]
+os.environ['PYTHONPATH'] = ":".join(PYTHONPATH)
+
+# Set architecture flags
+os.environ['ARCHFLAGS'] = "-arch x86_64"
+
+os.environ['EDITOR'] = "vim"
+os.environ['HOST'] = "$(uname -n)"
+os.environ.setdefault('UNAME', "$(uname)")
+
 os.environ['PYTHONSTARTUP'] = "%s/.pythonrc.py" % HOME
 os.environ['VISUAL'] = os.environ['EDITOR']
 
+LSCOLORS = [
+    'ax',  # directory
+    'hx',  # symbolic link
+    'cx',
+    'dx',
+    'bx',
+    'eg',
+    'ed',
+    'ab',
+    'ag',
+    'ac',
+    'ad',
+]
+
+os.environ['LSCOLORS'] = "".join(LSCOLORS)
+
 
 class MyShell(twosheds.Shell):
-    last_ls = ""
     last_gs = ""
 
     def __init__(self, *args, **kwargs):
         super(MyShell, self).__init__(*args, **kwargs)
-        self.language.grammar.transforms.insert(
+        self.transforms.insert(
             1,
             twosheds.transform.AliasTransform(MASK_ALIASES)
         )
 
-    @property
-    def git_branch(self):
-        """The current git branch."""
-        try:
-            return sh("git symbolic-ref --short HEAD 2> /dev/null").strip()
-        except subprocess.CalledProcessError:
-            return None
-
-    @property
-    def working_directory(self):
-        """The current working directory."""
-        try:
-            pwd = os.getcwdu()
-        except OSError:
-            return "?"
-        else:
-            return self.language.grammar.transform(pwd, inverse=True)
-
-    @property
-    def working_directory_short(self):
-        pwd = self.working_directory
-        parts = pwd.split("/")
-        if len(parts) == 1:
-            return parts[0]
-        else:
-            return "%s/%s" % ("/".join(part[0]for part in parts[:-1]),
-                              parts[-1])
-
-    @property
-    def prompt(self):
-        working_directory = self.working_directory_short
-        branch = self.git_branch
-        if branch is not None:
-            return "%s(%s) " % (working_directory, branch)
-        else:
-            return working_directory + " "
-
-    @property
-    def git_status(self):
-        try:
-            return sh("git status --porcelain 2> /dev/null")
-        except subprocess.CalledProcessError:
-            return None
-
-    def auto_gs(self):
-        """Automatically run ``git status`` if the output changes."""
-        gs = self.git_status
-        if gs is not None and gs != self.last_gs:
-            self.last_gs = gs
-            self.eval("git status -s")
-
-    def auto_ls(self):
-        """Automatically run ``ls`` if the output changes."""
-        ls = sh("ls")
-        if ls != self.last_ls:
-            self.last_ls = ls
-            self.eval("ls")
-
-    def read(self):
-        self.auto_ls()
-        self.auto_gs()
-        return super(MyShell, self).read()
+shell = MyShell(
+    environ=os.environ,
+    aliases=get_aliases(),
+    echo=True,
+    exclude=[r'.*.pyc'],
+)
 
 
-shell = MyShell(aliases=get_aliases(), echo=True, exclude=[r'.*.pyc'])
-
+@shell.command("findin")
 def find_in(directory, q):
     return shell.eval('mdfind %s -onlyin %s' % (q, directory))
-shell.language.semantics.builtins['findin'] = find_in
 
-shell.interact("Hello!")
+
+@shell.before_request
+def ps1():
+    pwd = working_directory(shell.transforms, short=True)
+    branch = git.branch()
+    ps1 = "%s " % pwd if branch is None else "%s(%s) " % (pwd, branch)
+    os.environ["PS1"] = ps1
+
+
+last_ls = ""
+
+
+@shell.before_request
+def ls():
+    """Automatically run ``ls`` if the output changes."""
+    global last_ls
+    ls = sh("ls")
+    if ls != last_ls:
+        last_ls = ls
+        shell.eval("ls")
+
+last_gs = ""
+
+
+@shell.before_request
+def gs():
+    """Automatically run ``git status`` if the output changes."""
+    global last_gs
+    gs = git.status()
+    if gs is not None and gs != last_gs:
+        last_gs = gs
+        shell.eval("git status -s")
+
+if __name__ == "__main__":
+    shell.interact()
