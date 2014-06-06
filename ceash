@@ -1,11 +1,12 @@
 #!/usr/bin/env python -i
 import os
+from pprint import pprint
 import sys
 
 # Path to Homebrew's site-packages
 sys.path.append("/usr/local/lib/python2.7/site-packages/")
 
-import twosheds
+from twosheds import Shell
 
 import git
 from helpers import working_directory
@@ -41,6 +42,7 @@ UTILITY_ALIASES = {
     # check connection speed
     'pingme': 'ping google.com',
     'vimrc': '$EDITOR ~/.vimrc',
+    'checkout': 'git checkout',
 }
 
 SHORT_ALIASES = {
@@ -72,7 +74,9 @@ MASK_ALIASES = {
 def get_aliases():
     return dict(HUMAN_ALIASES.items()
                 + UTILITY_ALIASES.items()
-                + SHORT_ALIASES.items())
+                + SHORT_ALIASES.items()
+                + MASK_ALIASES.items()
+                )
 
 
 
@@ -121,18 +125,7 @@ LSCOLORS = [
 
 os.environ['LSCOLORS'] = "".join(LSCOLORS)
 
-
-class MyShell(twosheds.Shell):
-    last_gs = ""
-
-    def __init__(self, *args, **kwargs):
-        super(MyShell, self).__init__(*args, **kwargs)
-        self.transforms.insert(
-            1,
-            twosheds.transform.AliasTransform(MASK_ALIASES)
-        )
-
-shell = MyShell(
+shell = Shell(
     environ=os.environ,
     aliases=get_aliases(),
     echo=True,
@@ -145,7 +138,12 @@ def find_in(directory, q):
     return shell.eval('mdfind %s -onlyin %s' % (q, directory))
 
 
-@shell.before_request
+@shell.command("alias")
+def alias(*args):
+    pprint(shell.aliases)
+
+
+@shell.before_interaction
 def ps1():
     pwd = working_directory(shell.transforms, short=True)
     branch = git.branch()
@@ -156,7 +154,7 @@ def ps1():
 last_ls = ""
 
 
-@shell.before_request
+@shell.before_interaction
 def ls():
     """Automatically run ``ls`` if the output changes."""
     global last_ls
@@ -168,7 +166,7 @@ def ls():
 last_gs = ""
 
 
-@shell.before_request
+@shell.before_interaction
 def gs():
     """Automatically run ``git status`` if the output changes."""
     global last_gs
@@ -178,4 +176,4 @@ def gs():
         shell.eval("git status -s")
 
 if __name__ == "__main__":
-    shell.interact()
+    shell.serve_forever()

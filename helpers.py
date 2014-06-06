@@ -1,6 +1,6 @@
 import os
 
-from twosheds.transform import transform
+from twosheds import transform
 
 
 def working_directory(transforms, short=False):
@@ -10,7 +10,7 @@ def working_directory(transforms, short=False):
     except OSError:
         return "?"
     else:
-        rv = transform(pwd, transforms, inverse=True)
+        rv = transform(pwd, transforms, word=True, inverse=True)
         if short:
             parts = rv.split("/")
             if len(parts) == 1:
