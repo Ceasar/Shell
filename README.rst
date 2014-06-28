@@ -1,19 +1,19 @@
 
-ceash - CEAsar SHell
+Shell
 ====================
 
-ceash is an sh-compatible command language interpreter that executes commands
-read from the standard input.
+**Shell** is an sh-compatible command language interpreter that executes
+commands read from the standard input.
 
 Installation
 ------------
 
-To install ceash, simply:
+To install Shell, simply:
 
 .. code-block:: bash
 
-    $ git clone git@github.com:Ceasar/ceash.git
-    $ cd ceash
+    $ git clone git@github.com:Ceasar/Shell.git
+    $ cd Shell
     # install requirements
     $ make install
     # symlink to /usr/local/bin
@@ -23,7 +23,7 @@ Optionally, to set as the default shell:
 
 .. code-block:: bash
 
-    # make ceash a standard shell. requires root privileges.
+    # make Shell a standard shell. requires root privileges.
     $ sudo make standard
-    # change the default shell to ceash
+    # change the default shell to Shell
     $ make default

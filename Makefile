@@ -1,13 +1,14 @@
-.PHONY: install link add_shell default
+.PHONY: install add_shell default
 
+NAME = Shell
 PWD = $(shell pwd)
-INSTALL = /usr/local/bin/ceash
+INSTALL = /usr/local/bin/$(NAME)
 
 install:
 	pip install -r requirements.txt
 
-link:
-	ln -is $(PWD)/ceash $(INSTALL)
+$(INSTALL):
+	ln -is $(PWD)/$(NAME) $(INSTALL)
 
 # requires root privileges
 standard: $(INSTALL)
