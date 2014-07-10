@@ -47,7 +47,7 @@ UTILITY_ALIASES = {
 
 SHORT_ALIASES = {
     '..': 'cd ..',
-    '...': 'cd ...',
+    '...': 'cd ../..',
     'c': 'cd',
     'e': '$EDITOR',
     'g': 'git',
@@ -104,6 +104,7 @@ os.environ['ARCHFLAGS'] = "-arch x86_64"
 
 os.environ['EDITOR'] = "vim"
 os.environ['HOST'] = "$(uname -n)"
+
 os.environ.setdefault('UNAME', "$(uname)")
 
 os.environ['PYTHONSTARTUP'] = "%s/.pythonrc.py" % HOME
