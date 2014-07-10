@@ -3,6 +3,8 @@ import os
 from pprint import pprint
 import sys
 
+ 
+
 # Path to Homebrew's site-packages
 sys.path.append("/usr/local/lib/python2.7/site-packages/")
 
@@ -176,12 +178,22 @@ last_gs = ""
 
 @shell.before_interaction
 def gs():
-    """Automatically run ``git status`` if the output changes."""
+    """
+    Print Git's status when it changes.
+
+    This prints several things:
+
+    #. The current git status
+
+    #. A diffstat
+
+    #. Warnings about changes that introduce whitespace errors
+    """
     global last_gs
     gs = git.status()
     if gs is not None and gs != last_gs:
         last_gs = gs
-        shell.eval("git status -s")
+        shell.eval("git status --short & git diff --stat & git diff --check")
 
 if __name__ == "__main__":
     shell.serve_forever()
