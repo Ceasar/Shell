@@ -29,14 +29,21 @@ HUMAN_ALIASES = {
 UTILITY_ALIASES = {
     # more intuitive xargs
     'args': 'xargs -0',
-    # grep recursively. show line numbers and one line of context on either side
+    # grep recursively. show line numbers and one line of context on either
+    # side
     'f': 'grep -rn -C 1',
     # find name
     'fn': 'find . -name',
-     # Remove all local merged branches
-    'gitclean': 'git branch --merged | grep -v ^\* | sed "s/^ *//" | xargs -n 1 git accept',
-     # Remove all remote merged branches
-    'gitcleanremote': 'git branch --merged | grep -v ^\* | sed "s/^ *//" | xargs -n 1 git accept',
+    # Remove all local merged branches
+    'gitclean': '|'.join(['git branch --merged',
+                          'grep --invert-match ^\*',
+                          'sed "s/^ *//"',  # trim leading whitespace
+                          'xargs -n 1 git branch --delete']),
+    # Remove all remote merged branches
+    'gitcleanremote': '|'.join(['git branch --remotes --merged',
+                                'grep --invert-match ^\*',
+                                'sed "s/^ *//"',  # trim leading whitespace
+                                'xargs -n 1 git push origin :']),
     # list filenames by relative path
     'lr': 'find . -type f | sed "s#^./##',
     # check connection speed
@@ -71,13 +78,13 @@ MASK_ALIASES = {
     'ls': 'ls -G',
 }
 
+
 def get_aliases():
     return dict(HUMAN_ALIASES.items()
                 + UTILITY_ALIASES.items()
                 + SHORT_ALIASES.items()
                 + MASK_ALIASES.items()
                 )
-
 
 
 HOME = os.environ['HOME']
