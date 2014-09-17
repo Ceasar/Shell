@@ -193,7 +193,16 @@ def gs():
     gs = git.status()
     if gs is not None and gs != last_gs:
         last_gs = gs
-        shell.eval("git status --short & git diff --stat & git diff --check")
+        commands = [
+            # Display the git status in the short-format
+            "git status --short",
+            # Generate a diffstat
+            "git diff --stat",
+            # Warn if changes introduce whitespace errors
+            "git diff --check",
+        ]
+        for command in commands:
+            shell.eval(command)
 
 if __name__ == "__main__":
     shell.serve_forever()
