@@ -204,5 +204,23 @@ def gs():
         for command in commands:
             shell.eval(command)
 
+
+last_git_branch = ""
+
+@shell.before_interaction
+def git_branch():
+    """
+    List Git branches when they change.
+    """
+    global last_git_branch
+    try:
+        git_branch = sh("git branch --no-color 2> /dev/null")
+    except ValueError:
+        pass
+    else:
+        if git_branch != last_git_branch:
+            last_git_branch = git_branch
+            shell.eval("git branch -vv")
+
 if __name__ == "__main__":
     shell.serve_forever()
