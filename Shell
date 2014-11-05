@@ -3,7 +3,6 @@ import os
 from pprint import pprint
 import sys
 
- 
 
 # Path to Homebrew's site-packages
 sys.path.append("/usr/local/lib/python2.7/site-packages/")
@@ -88,19 +87,27 @@ def get_aliases():
                 + MASK_ALIASES.items()
                 )
 
-
 HOME = os.environ['HOME']
-PATH = ["%s/local/bin" % HOME,
-        "%s/bin" % HOME,
-        "/usr/local/bin",
-        "/usr/bin",
-        "/usr/sbin",
-        "/usr/X11R6/bin",
-        "/bin",
-        "/sbin",
-        "/usr/local/share/npm/bin",
-        ]
-os.environ['PATH'] = ":".join(PATH)
+
+# Extend the existing PATH with any PATH segments we need, which aren't already
+# there.
+OLD_PATH = os.environ['PATH'].split(':')
+NEW_PATH = sorted({
+    "%s/local/bin" % HOME,
+    "%s/bin" % HOME,
+    "/usr/local/bin",
+    "/usr/bin",
+    "/usr/sbin",
+    "/usr/X11R6/bin",
+    "/bin",
+    "/sbin",
+    "/usr/local/share/npm/bin",
+    } - set(OLD_PATH),
+    # NOTE: This assumes that path order is best determined by depth in the
+    # file system, which is reasonable, but could perhaps lead to bugs.
+    key=lambda path: -path.count('/')
+)
+os.environ['PATH'] = ":".join(OLD_PATH + NEW_PATH)
 
 PYTHONPATH = [
     "/Users/ceasarbautista/lib/python/",
