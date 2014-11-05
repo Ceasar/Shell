@@ -161,66 +161,48 @@ def ps1():
     os.environ["PS1"] = ps1
 
 
-last_ls = ""
-
-
-@shell.before_interaction
-def ls():
-    """Automatically run ``ls`` if the output changes."""
-    global last_ls
-    ls = sh("ls")
-    if ls != last_ls:
-        last_ls = ls
-        shell.eval("ls")
-
-last_gs = ""
-
-
-@shell.before_interaction
-def gs():
+class Watch(object):
     """
-    Print Git's status when it changes.
+    Execute *commands* if the output of *script* changes.
 
-    This prints several things:
-
-    #. The current git status
-
-    #. A diffstat
-
-    #. Warnings about changes that introduce whitespace errors
+    This cannot be implemented as a closure, since closures do not give the
+    ability to modify bound variables, but ``last_out`` needs to be variable.
     """
-    global last_gs
-    gs = git.status()
-    if gs is not None and gs != last_gs:
-        last_gs = gs
-        commands = [
-            # Display the git status in the short-format
-            "git status --short",
-            # Generate a diffstat
-            "git diff --stat",
-            # Warn if changes introduce whitespace errors
-            "git diff --check",
-        ]
-        for command in commands:
-            shell.eval(command)
+    def __init__(self, script, commands):
+        self.script = script
+        self.commands = commands
+        self.last_out = ""
+
+    def __call__(self):
+        try:
+            out = self.script()
+        except ValueError:
+            pass
+        else:
+            if out is not None and out != self.last_out:
+                self.last_out = out
+                for command in self.commands:
+                    shell.eval(command)
 
 
-last_git_branch = ""
-
-@shell.before_interaction
-def git_branch():
-    """
-    List Git branches when they change.
-    """
-    global last_git_branch
-    try:
-        git_branch = sh("git branch --no-color 2> /dev/null")
-    except ValueError:
-        pass
-    else:
-        if git_branch != last_git_branch:
-            last_git_branch = git_branch
-            shell.eval("git branch -vv")
+watches = [
+    # Print Git's status (the current git status, a diffstat, and warnings
+    # about whitespace errors) when the git status changes
+    Watch(git.status, [
+        # Display the git status in the short-format
+        "git status --short",
+        # Generate a diffstat
+        "git diff --stat",
+        # Warn if changes introduce whitespace errors
+        "git diff --check",
+    ]),
+    # List Git branches when they change
+    Watch(lambda: sh("git branch --no-color 2> /dev/null"), ["git branch -vv"]),
+    # List files in the current directory when they change
+    Watch(lambda: sh("ls"), ["ls"]),
+]
+for watch in watches:
+    shell.before_interaction(watch)
 
 if __name__ == "__main__":
     shell.serve_forever()
