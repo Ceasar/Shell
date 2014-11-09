@@ -206,7 +206,8 @@ watches = [
     # List Git branches when they change
     Watch(lambda: sh("git branch --no-color 2> /dev/null"), ["git branch -vv"]),
     # List Git stash
-    Watch(lambda: sh("git stash list 2> /dev/null"), ["git stash list"]),
+    Watch(lambda: sh("git stash list 2> /dev/null"),
+          ["git --no-pager stash list"]),
     # List files in the current directory when they change
     Watch(lambda: sh("ls"), ["ls"]),
 ]
