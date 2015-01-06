@@ -203,16 +203,26 @@ watches = [
         # Warn if changes introduce whitespace errors
         "git diff --check",
     ]),
-    # List Git branches when they change
-    Watch(lambda: sh("git branch --no-color 2> /dev/null"), ["git branch -vv"]),
-    # List Git stash
-    Watch(lambda: sh("git stash list 2> /dev/null"),
-          ["git --no-pager stash list"]),
     # List files in the current directory when they change
     Watch(lambda: sh("ls"), ["ls"]),
 ]
 for watch in watches:
     shell.before_interaction(watch)
+
+
+@shell.completes
+def git_branches(word):
+    try:
+        branches = sh("git branch --list {}* 2> /dev/null".format(word)).split()
+    except ValueError:
+        pass
+    else:
+        try:
+            branches.remove("*")
+        except ValueError:
+            pass
+        for branch in branches:
+            yield branch
 
 if __name__ == "__main__":
     shell.serve_forever()
