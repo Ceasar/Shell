@@ -193,6 +193,14 @@ class Watch(object):
 
 
 watches = [
+    # List Git branches when they change
+    Watch(lambda: sh("git branch --no-color 2> /dev/null"), ["git branch -vv"]),
+    # List last ten commits
+    Watch(lambda: sh("git --no-pager log --oneline --max-count=10 2> /dev/null"),
+          ["git --no-pager log --oneline --max-count=10"]),
+    # List Git stash
+    Watch(lambda: sh("git stash list 2> /dev/null"),
+          ["git --no-pager stash list"]),
     # Print Git's status (the current git status, a diffstat, and warnings
     # about whitespace errors) when the git status changes
     Watch(git.status, [
